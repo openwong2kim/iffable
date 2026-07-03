@@ -27,12 +27,12 @@ call. Verify their output against the requirements before accepting it.
 | Tier | Model | Use for |
 |------|-------|---------|
 | Orchestrator + hard worker | **Opus 4.8** (you) | judgment, hard reasoning, complex implementation, security review, synthesis |
-| Simple worker | **`claude-sonnet-4-6`** subagent | grep/scan, formatting, renaming, file copies, boilerplate, mechanical edits |
+| Simple worker | **`claude-sonnet-5`** subagent | grep/scan, formatting, renaming, file copies, boilerplate, mechanical edits |
 | Banned | **Haiku** | never — still blocked mechanically by the spawn guard |
 
-Delegate the genuinely mechanical work to **`claude-sonnet-4-6`**. Keep anything with
+Delegate the genuinely mechanical work to **`claude-sonnet-5`**. Keep anything with
 real judgment in it. **Haiku stays banned** on every profile — the guard denies it and
-points you to `claude-sonnet-4-6`.
+points you to `claude-sonnet-5`.
 
 ---
 

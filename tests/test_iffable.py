@@ -168,7 +168,7 @@ class TestSpawnGuard(unittest.TestCase):
             reason = iffable.decide_spawn(
                 "fable",
                 "Agent",
-                {"prompt": big, "model": "claude-sonnet-4-6"},
+                {"prompt": big, "model": "claude-sonnet-5"},
                 root,
                 1500,
             )

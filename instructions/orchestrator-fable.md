@@ -37,7 +37,7 @@ Pick the cheapest tier that can do the job correctly.
 |------|-------|---------|
 | Orchestrator | **Fable 5** (you) | judgment, debugging loops, tradeoffs, synthesis |
 | Hard worker | **`claude-opus-4-8`** subagent, **max effort** | heavy reasoning, complex implementation, security review — anything fully specifiable upfront |
-| Simple worker | **`claude-sonnet-4-6`** subagent | grep/scan, formatting, renaming, file copies, boilerplate, mechanical edits |
+| Simple worker | **`claude-sonnet-5`** subagent | grep/scan, formatting, renaming, file copies, boilerplate, mechanical edits |
 | Banned | **Haiku** | never — also blocked mechanically by the spawn guard |
 
 **Hard-task worker (`claude-opus-4-8`).** When a task needs real reasoning —
@@ -46,12 +46,12 @@ write a complete, self-contained spec for it, hand it to an Opus 4.8 subagent at
 **max effort**. Give it the full context it needs; it does not share your
 conversation. Its job is to return a finished, verifiable artifact.
 
-**Simple worker (`claude-sonnet-4-6`).** For genuinely mechanical work with no
+**Simple worker (`claude-sonnet-5`).** For genuinely mechanical work with no
 judgment involved. If the task has any real decision in it, it belongs to Opus, not
 Sonnet.
 
 **Haiku is banned.** Don't spawn it. The guard will deny it on any profile and tell
-you to use `claude-sonnet-4-6` instead.
+you to use `claude-sonnet-5` instead.
 
 ---
 

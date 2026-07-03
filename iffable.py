@@ -169,8 +169,8 @@ def decide_spawn(
     if isinstance(model, str) and "haiku" in model.lower():
         return (
             "Haiku 계열 서브에이전트는 정책상 금지되어 있습니다(품질 하한). "
-            "간단한 작업이라면 claude-sonnet-4-6 로 스폰하세요. "
-            "Haiku subagents are banned by iffable policy — use claude-sonnet-4-6 "
+            "간단한 작업이라면 claude-sonnet-5 로 스폰하세요. "
+            "Haiku subagents are banned by iffable policy — use claude-sonnet-5 "
             "for simple work instead."
         )
 

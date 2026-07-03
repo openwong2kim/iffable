@@ -32,7 +32,7 @@ once, then enforces the few rules that actually protect quota.
 
 | Guard | Hook event | Fires when | Effect |
 |-------|-----------|-----------|--------|
-| **Haiku ban** | PreToolUse (`Agent`\|`Task`\|`Workflow`) | spawn `tool_input.model` contains `haiku` — **any profile** | deny; suggests `claude-sonnet-4-6` |
+| **Haiku ban** | PreToolUse (`Agent`\|`Task`\|`Workflow`) | spawn `tool_input.model` contains `haiku` — **any profile** | deny; suggests `claude-sonnet-5` |
 | **Ledger guard (spawn)** | PreToolUse | **fable profile**: heavy delegation only — spawn model contains `opus` or is unspecified (inherits Fable); explicit light models (e.g. sonnet) are exempt, `Workflow` is always guarded, `fork` exempt — **and** prompt/script > `IFFABLE_SPAWN_LIMIT` chars **and** no `.workflow/LEDGER.md` in the tree | deny; tells you to write the ledger first |
 | **Ledger guard (stop)** | Stop | **fable profile**: ledger has any open `- [ ]` line | block turn end; lists the open items |
 
@@ -73,7 +73,7 @@ When armed, iffable injects `instructions/orchestrator-fable.md`, which encodes:
 |------|-------|---------|
 | Orchestrator | **Fable 5** | judgment, debugging loops, tradeoffs, synthesis |
 | Hard worker | **`claude-opus-4-8`** (max effort) | heavy reasoning, complex implementation, security review |
-| Simple worker | **`claude-sonnet-4-6`** | grep/scan, formatting, renaming, boilerplate |
+| Simple worker | **`claude-sonnet-5`** | grep/scan, formatting, renaming, boilerplate |
 | Banned | **Haiku** | never (also enforced by the guard) |
 
 **External review — codex & GLM.** Before closing substantial work, optionally
