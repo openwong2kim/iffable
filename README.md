@@ -41,27 +41,36 @@ broken hook can never brick a session.
 
 ---
 
-## Fable-only arming (and the startup-model caveat)
+## Fable-only arming (mid-session `/model` changes are tracked)
 
-iffable resolves a **profile** at session start from the launch model:
+iffable resolves a **profile** from the model in play:
 
 - model contains `fable` (case-insensitive) → **`fable`** — guards armed.
 - anything else → **`fallback`** — guards dormant (except the Haiku ban, which is
   enforced on every profile).
 
-The profile is written to a per-session cache file and reused by the later hooks
-(PreToolUse/Stop payloads carry no model field).
+At session start the profile is resolved from the launch model and cached per
+session. But PreToolUse/Stop payloads carry no model field, so on **every guard
+invocation** iffable re-reads the current model from the conversation transcript
+(the last assistant entry's `.message.model` in the JSONL at `transcript_path`)
+and re-resolves the profile. Net effect:
 
-> ⚠️ **Arming is decided by the model the session *started* on.** Switching models
-> mid-session with `/model` does **not** re-arm iffable — the SessionStart hook has
-> already run. To get an armed session, **launch on Fable**:
+- start on Sonnet, switch to Fable mid-session with `/model` → guards **arm** from
+  the next turn.
+- start on Fable, switch away → guards go **dormant**.
+
+> ⚠️ Two caveats. (1) The transcript schema is **undocumented** — if it ever
+> changes, iffable silently falls back to the session-start cache (fail-open, never
+> bricks a session). (2) The **orchestration policy text is only injected at
+> SessionStart** on a Fable launch; arming mid-session enforces the guards but does
+> not inject the policy. For the full experience, launch on Fable:
 >
 > ```sh
 > claude --model claude-fable-5
 > ```
 
 Override the auto behavior at any time with `IFFABLE_PROFILE` (`fable` / `fallback` /
-`off`).
+`off`) — the env override beats both the transcript and the cache.
 
 ---
 

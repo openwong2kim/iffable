@@ -106,6 +106,57 @@ def profile_from_cache(session_id: str) -> str:
     return "fallback"
 
 
+def model_from_transcript(transcript_path: str) -> Optional[str]:
+    """transcript JSONL에서 마지막 assistant 항목의 모델 ID를 반환한다.
+
+    세션 중간 /model 변경 감지용. 훅 페이로드에는 model 필드가 없으므로
+    (SessionStart 제외), 대화 기록의 `.message.model`을 읽는 것이 유일한
+    방법이다. 단 이 스키마는 비공식·미문서화이므로 어떤 실패에서도 None을
+    반환해 캐시 폴백으로 넘긴다 (fail-open).
+    """
+    if not transcript_path:
+        return None
+    last_line = None
+    try:
+        with open(transcript_path, "r", encoding="utf-8") as fh:
+            for line in fh:
+                # 파싱 비용 절약: assistant 타입 후보 라인만 마지막 것을 보관
+                if '"type":"assistant"' in line or '"type": "assistant"' in line:
+                    last_line = line
+    except OSError:
+        return None
+    if last_line is None:
+        return None
+    try:
+        data = json.loads(last_line)
+    except ValueError:
+        return None
+    if data.get("type") != "assistant":
+        return None
+    message = data.get("message")
+    if isinstance(message, dict):
+        model = message.get("model")
+        if isinstance(model, str) and model:
+            return model
+    return None
+
+
+def profile_for_guard(session_id: str, transcript_path: str) -> str:
+    """가드 실행 시점의 프로파일. 우선순위: env > transcript 최신 모델 > 캐시.
+
+    transcript에서 현재 모델을 읽을 수 있으면 세션 중간 /model 변경이
+    즉시 반영된다 (Fable로 전환 → 무장, 이탈 → 휴면). 못 읽으면 세션
+    시작 모델 기준 캐시로 폴백한다.
+    """
+    override = _env_profile_override()
+    if override is not None:
+        return override
+    model = model_from_transcript(transcript_path)
+    if model:
+        return resolve_profile(model)
+    return profile_from_cache(session_id)
+
+
 # ── 레저 탐색 ──────────────────────────────────────────────────────────────
 def find_ledger(start_dir: str) -> Optional[str]:
     """start_dir 에서 부모로 올라가며 `.workflow/LEDGER.md` 를 찾는다.
@@ -295,7 +346,8 @@ def cmd_session_start(payload: Dict[str, Any]) -> None:
 def cmd_guard_spawn(payload: Dict[str, Any]) -> None:
     """PreToolUse(Agent|Task|Workflow): Haiku 금지 + 레저 가드."""
     session_id = str(payload.get("session_id", ""))
-    profile = profile_from_cache(session_id)
+    transcript_path = str(payload.get("transcript_path", ""))
+    profile = profile_for_guard(session_id, transcript_path)
     tool_name = payload.get("tool_name", "")
     tool_input = payload.get("tool_input") or {}
     cwd = payload.get("cwd", "")
@@ -317,7 +369,8 @@ def cmd_guard_spawn(payload: Dict[str, Any]) -> None:
 def cmd_guard_stop(payload: Dict[str, Any]) -> None:
     """Stop: 열린 레저 항목이 있으면 턴 종료 차단."""
     session_id = str(payload.get("session_id", ""))
-    profile = profile_from_cache(session_id)
+    transcript_path = str(payload.get("transcript_path", ""))
+    profile = profile_for_guard(session_id, transcript_path)
     cwd = payload.get("cwd", "")
     stop_hook_active = payload.get("stop_hook_active", False)
 

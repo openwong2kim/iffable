@@ -222,6 +222,66 @@ class TestSpawnGuard(unittest.TestCase):
             self.assertIsNotNone(reason)
 
 
+class TestTranscriptModelDetection(unittest.TestCase):
+    """세션 중간 /model 변경 감지 (transcript 기반)."""
+
+    def setUp(self) -> None:
+        _clear_env()
+
+    def tearDown(self) -> None:
+        _clear_env()
+
+    def _write_transcript(self, root: str, lines: list) -> str:
+        path = os.path.join(root, "transcript.jsonl")
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write("\n".join(lines) + "\n")
+        return path
+
+    def test_last_assistant_model_wins(self) -> None:
+        # 마지막 assistant 항목의 모델이 반환돼야 한다 (중간 변경 반영)
+        with tempfile.TemporaryDirectory() as root:
+            path = self._write_transcript(root, [
+                '{"type":"user","message":{"role":"user","content":"hi"}}',
+                '{"type":"assistant","message":{"model":"claude-fable-5","role":"assistant"}}',
+                '{"type":"user","message":{"role":"user","content":"switch"}}',
+                '{"type":"assistant","message":{"model":"claude-opus-4-8","role":"assistant"}}',
+            ])
+            self.assertEqual(
+                iffable.model_from_transcript(path), "claude-opus-4-8"
+            )
+
+    def test_broken_or_missing_transcript_returns_none(self) -> None:
+        self.assertIsNone(iffable.model_from_transcript(""))
+        self.assertIsNone(iffable.model_from_transcript("/no/such/file.jsonl"))
+        with tempfile.TemporaryDirectory() as root:
+            path = self._write_transcript(root, ['{"type":"assistant" broken json'])
+            self.assertIsNone(iffable.model_from_transcript(path))
+
+    def test_guard_profile_flips_with_transcript(self) -> None:
+        # 캐시는 fallback이어도 transcript 최신 모델이 fable이면 무장
+        with tempfile.TemporaryDirectory() as root:
+            path = self._write_transcript(root, [
+                '{"type":"assistant","message":{"model":"claude-fable-5"}}',
+            ])
+            self.assertEqual(
+                iffable.profile_for_guard("no-cache-session", path), "fable"
+            )
+            # transcript를 못 읽으면 캐시 폴백 (캐시 없음 → fallback)
+            self.assertEqual(
+                iffable.profile_for_guard("no-cache-session", ""), "fallback"
+            )
+
+    def test_env_override_beats_transcript(self) -> None:
+        os.environ["IFFABLE_PROFILE"] = "off"
+        with tempfile.TemporaryDirectory() as root:
+            path = self._write_transcript(root, [
+                '{"type":"assistant","message":{"model":"claude-fable-5"}}',
+            ])
+            self.assertEqual(
+                iffable.profile_for_guard("any", path), "off"
+            )
+
+
 class TestStopGuard(unittest.TestCase):
     def setUp(self) -> None:
         _clear_env()
