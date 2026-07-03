@@ -1,11 +1,11 @@
 {
-  "_comment": "iffable — example wiring for ~/.claude/settings.json (or settings.local.json). MERGE these keys into your existing file; do not overwrite it. Keep hooks/env in settings.local.json if you hit the Claude Code auto-migration bug (GitHub #22659) that strips hooks on /model.",
+  "_comment": "iffable — example hook wiring. MERGE these keys into your existing Claude Code settings; do NOT overwrite the file. Keep hooks/env in settings.local.json to dodge the Claude Code /model auto-migration bug (#22659) that strips hooks.",
 
-  "_env_comment": "FABLE_ORCH_PROFILE=auto -> profile is decided by the session's startup model. The OPUS threshold is set effectively-infinite so non-Fable sessions never block: the guard is dormant unless the session STARTED on Fable. This is the 'fable-only' switch.",
+  "_env_comment": "IFFABLE_PROFILE=auto -> profile is decided by the session's startup model (model contains 'fable' -> armed; else dormant). Force fable/fallback/off to override. IFFABLE_SPAWN_LIMIT is the char length above which the spawn ledger guard applies.",
   "env": {
-    "FABLE_ORCH_PROFILE": "auto",
-    "LEDGER_GUARD_THRESHOLD_FABLE": "1500",
-    "LEDGER_GUARD_THRESHOLD_OPUS": "100000000"
+    "IFFABLE_HOME": "$HOME/.claude/iffable",
+    "IFFABLE_PROFILE": "auto",
+    "IFFABLE_SPAWN_LIMIT": "1500"
   },
 
   "hooks": {
@@ -14,7 +14,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "CLAUDE_PLUGIN_ROOT=\"$HOME/.claude/orchestrator\" python3 \"$HOME/.claude/orchestrator/scripts/inject_instructions.py\""
+            "command": "IFFABLE_HOME=\"$HOME/.claude/iffable\" python3 \"$HOME/.claude/iffable/iffable.py\" session-start"
           }
         ]
       }
@@ -25,7 +25,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "CLAUDE_PLUGIN_ROOT=\"$HOME/.claude/orchestrator\" python3 \"$HOME/.claude/orchestrator/scripts/ledger_guard_spawn.py\""
+            "command": "IFFABLE_HOME=\"$HOME/.claude/iffable\" python3 \"$HOME/.claude/iffable/iffable.py\" guard-spawn"
           }
         ]
       }
@@ -35,7 +35,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "CLAUDE_PLUGIN_ROOT=\"$HOME/.claude/orchestrator\" python3 \"$HOME/.claude/orchestrator/scripts/ledger_guard_stop.py\""
+            "command": "IFFABLE_HOME=\"$HOME/.claude/iffable\" python3 \"$HOME/.claude/iffable/iffable.py\" guard-stop"
           }
         ]
       }
@@ -45,7 +45,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "CLAUDE_PLUGIN_ROOT=\"$HOME/.claude/orchestrator\" python3 \"$HOME/.claude/orchestrator/scripts/cleanup_session_cache.py\""
+            "command": "IFFABLE_HOME=\"$HOME/.claude/iffable\" python3 \"$HOME/.claude/iffable/iffable.py\" session-end"
           }
         ]
       }

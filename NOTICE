@@ -1,25 +1,20 @@
 iffable
 Copyright (c) 2026 openwong2kim
 
-This product is licensed under the Apache License, Version 2.0 (see LICENSE),
-with the exception of the bundled hook scripts noted below.
+Licensed under the Apache License, Version 2.0 (see LICENSE).
 
 --------------------------------------------------------------------------------
-Third-party components
+Attribution
 --------------------------------------------------------------------------------
 
-The four Python hook scripts in scripts/ are redistributed unmodified from:
+iffable is an original, clean-room implementation. Its enforcement-mechanism
+concept — a Claude Code SessionStart context injection paired with PreToolUse and
+Stop hooks that guard a Requirements Ledger — was inspired by:
 
     fable5-orchestrator  —  https://github.com/Rylaa/fable5-orchestrator
     Copyright (c) 2026 Yusuf Demirkoparan
-    Licensed under the MIT License (see scripts/LICENSE)
+    Licensed under the MIT License
 
-  - scripts/inject_instructions.py
-  - scripts/ledger_guard_spawn.py
-  - scripts/ledger_guard_stop.py
-  - scripts/cleanup_session_cache.py
-
-iffable's original contribution is the model-tier instruction profiles
-(instructions/), the "fable-only" activation wiring (settings.example.json),
-and the installer/docs. It references the upstream plugin's mechanism; it does
-not fork or alter the upstream scripts.
+No source code from fable5-orchestrator is retained, copied, or derived here.
+iffable was written independently from a specification; the reference above is an
+acknowledgment of the mechanism concept only, not of any shared implementation.
