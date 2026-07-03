@@ -154,8 +154,12 @@ def decide_spawn(
     """스폰 가드 판정. deny 사유 문자열을 반환하거나, 허용이면 None.
 
     - HAIKU 금지: 모든 프로파일에서 tool_input.model 에 'haiku' 포함 시 deny.
-    - 레저 가드: fable 프로파일에서만. fork 는 면제. 텍스트 길이 > limit 이고
-      레저 부재 시 deny.
+    - 레저 가드: fable 프로파일에서만, 무거운 위임에만 적용. fork 는 면제.
+      경량 모델(sonnet 등)을 명시한 Agent/Task 스폰은 면제 — 레저 가드는
+      Opus 위임 또는 모델 미지정(세션 모델 Fable 상속 = Fable 쿼터 소모)에만
+      적용한다. Workflow 는 스크립트 내부 모델 오버라이드를 신뢰성 있게 파싱할
+      수 없으므로 모델 무관하게 기존대로 가드한다.
+      텍스트 길이 > limit 이고 레저 부재 시 deny.
     """
     if not isinstance(tool_input, dict):
         tool_input = {}
@@ -181,6 +185,10 @@ def decide_spawn(
     if tool_name == "Workflow":
         text = tool_input.get("script")
     else:
+        # 경량 모델을 명시한 위임(기계적 잡일 → sonnet 등)은 레저 면제.
+        # 모델 미지정은 세션 모델(Fable)을 상속하므로 무거운 위임으로 취급.
+        if isinstance(model, str) and "opus" not in model.lower():
+            return None
         text = tool_input.get("prompt")
     text = text if isinstance(text, str) else ""
 

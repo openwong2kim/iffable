@@ -88,8 +88,11 @@ you do it is yours.
 ## 5. Requirements Ledger discipline
 
 When you delegate anything non-trivial, the requirements live in
-`./.workflow/LEDGER.md`. This is enforced: the spawn guard **denies** any delegation
-whose prompt exceeds ~1500 characters if no ledger exists in the tree.
+`./.workflow/LEDGER.md`. This is enforced for **heavy delegations**: the spawn guard
+**denies** an Opus (or model-unspecified, i.e. Fable-inheriting) delegation whose
+prompt exceeds ~1500 characters if no ledger exists in the tree. Workflows are always
+guarded. Mechanical sonnet delegations are exempt — but keep the ledger habit for
+anything with real requirements.
 
 Format — numbered checkbox lines:
 

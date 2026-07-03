@@ -160,6 +160,35 @@ class TestSpawnGuard(unittest.TestCase):
             )
             self.assertIsNone(reason)
 
+    def test_sonnet_model_exempt_from_ledger(self) -> None:
+        # 경량 모델(sonnet) 명시 위임은 대형 프롬프트여도 레저 가드 면제
+        with tempfile.TemporaryDirectory() as root:
+            os.makedirs(os.path.join(root, ".git"))
+            big = "x" * 1600
+            reason = iffable.decide_spawn(
+                "fable",
+                "Agent",
+                {"prompt": big, "model": "claude-sonnet-4-6"},
+                root,
+                1500,
+            )
+            self.assertIsNone(reason)
+
+    def test_opus_model_still_guarded(self) -> None:
+        # Opus 명시 위임은 레저 가드 유지
+        with tempfile.TemporaryDirectory() as root:
+            os.makedirs(os.path.join(root, ".git"))
+            big = "x" * 1600
+            reason = iffable.decide_spawn(
+                "fable",
+                "Agent",
+                {"prompt": big, "model": "claude-opus-4-8"},
+                root,
+                1500,
+            )
+            self.assertIsNotNone(reason)
+            self.assertIn("LEDGER", reason)
+
     def test_fork_exempt(self) -> None:
         with tempfile.TemporaryDirectory() as root:
             os.makedirs(os.path.join(root, ".git"))

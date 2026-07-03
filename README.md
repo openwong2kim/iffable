@@ -33,7 +33,7 @@ once, then enforces the few rules that actually protect quota.
 | Guard | Hook event | Fires when | Effect |
 |-------|-----------|-----------|--------|
 | **Haiku ban** | PreToolUse (`Agent`\|`Task`\|`Workflow`) | spawn `tool_input.model` contains `haiku` — **any profile** | deny; suggests `claude-sonnet-4-6` |
-| **Ledger guard (spawn)** | PreToolUse | **fable profile**: prompt/script > `IFFABLE_SPAWN_LIMIT` chars **and** no `.workflow/LEDGER.md` in the tree (`fork` exempt) | deny; tells you to write the ledger first |
+| **Ledger guard (spawn)** | PreToolUse | **fable profile**: heavy delegation only — spawn model contains `opus` or is unspecified (inherits Fable); explicit light models (e.g. sonnet) are exempt, `Workflow` is always guarded, `fork` exempt — **and** prompt/script > `IFFABLE_SPAWN_LIMIT` chars **and** no `.workflow/LEDGER.md` in the tree | deny; tells you to write the ledger first |
 | **Ledger guard (stop)** | Stop | **fable profile**: ledger has any open `- [ ]` line | block turn end; lists the open items |
 
 All hooks **fail open**: malformed input or any internal error exits 0 silently, so a
@@ -141,7 +141,8 @@ python3 -m unittest discover -s tests
 
 Pure stdlib `unittest`, zero external dependencies. Covers profile resolution, ledger
 walk-up (including the `.git` boundary), the spawn decision (Haiku ban, over-limit
-without ledger, fork exemption, fallback dormancy), and the stop decision.
+without ledger, light-model exemption, Opus still-guarded, fork exemption, fallback
+dormancy), and the stop decision.
 
 ---
 
