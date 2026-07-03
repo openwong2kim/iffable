@@ -1,0 +1,5 @@
+# local Claude Code state / editor cruft — never publish
+.workflow/
+.DS_Store
+__pycache__/
+*.pyc

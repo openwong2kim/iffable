@@ -1,0 +1,25 @@
+iffable
+Copyright (c) 2026 openwong2kim
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE),
+with the exception of the bundled hook scripts noted below.
+
+--------------------------------------------------------------------------------
+Third-party components
+--------------------------------------------------------------------------------
+
+The four Python hook scripts in scripts/ are redistributed unmodified from:
+
+    fable5-orchestrator  —  https://github.com/Rylaa/fable5-orchestrator
+    Copyright (c) 2026 Yusuf Demirkoparan
+    Licensed under the MIT License (see scripts/LICENSE)
+
+  - scripts/inject_instructions.py
+  - scripts/ledger_guard_spawn.py
+  - scripts/ledger_guard_stop.py
+  - scripts/cleanup_session_cache.py
+
+iffable's original contribution is the model-tier instruction profiles
+(instructions/), the "fable-only" activation wiring (settings.example.json),
+and the installer/docs. It references the upstream plugin's mechanism; it does
+not fork or alter the upstream scripts.

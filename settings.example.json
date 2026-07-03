@@ -1,0 +1,54 @@
+{
+  "_comment": "iffable — example wiring for ~/.claude/settings.json (or settings.local.json). MERGE these keys into your existing file; do not overwrite it. Keep hooks/env in settings.local.json if you hit the Claude Code auto-migration bug (GitHub #22659) that strips hooks on /model.",
+
+  "_env_comment": "FABLE_ORCH_PROFILE=auto -> profile is decided by the session's startup model. The OPUS threshold is set effectively-infinite so non-Fable sessions never block: the guard is dormant unless the session STARTED on Fable. This is the 'fable-only' switch.",
+  "env": {
+    "FABLE_ORCH_PROFILE": "auto",
+    "LEDGER_GUARD_THRESHOLD_FABLE": "1500",
+    "LEDGER_GUARD_THRESHOLD_OPUS": "100000000"
+  },
+
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "CLAUDE_PLUGIN_ROOT=\"$HOME/.claude/orchestrator\" python3 \"$HOME/.claude/orchestrator/scripts/inject_instructions.py\""
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Agent|Task|Workflow",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "CLAUDE_PLUGIN_ROOT=\"$HOME/.claude/orchestrator\" python3 \"$HOME/.claude/orchestrator/scripts/ledger_guard_spawn.py\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "CLAUDE_PLUGIN_ROOT=\"$HOME/.claude/orchestrator\" python3 \"$HOME/.claude/orchestrator/scripts/ledger_guard_stop.py\""
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "CLAUDE_PLUGIN_ROOT=\"$HOME/.claude/orchestrator\" python3 \"$HOME/.claude/orchestrator/scripts/cleanup_session_cache.py\""
+          }
+        ]
+      }
+    ]
+  }
+}
